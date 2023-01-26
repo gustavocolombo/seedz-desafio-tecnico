@@ -43,6 +43,9 @@ $ yarn run start:dev
 
 # production mode
 $ yarn run start:prod
+
+# run migrations
+$ yarn typeorm migration:run -d  ormconfig.ts
 ```
 
 ## Test
