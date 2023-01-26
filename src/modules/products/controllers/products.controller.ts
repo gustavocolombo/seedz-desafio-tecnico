@@ -2,11 +2,14 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  Query,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -19,6 +22,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
 import { UpdateProductsDTO } from '../dtos/update-products.dto';
@@ -68,8 +72,16 @@ export class ProductsController {
   })
   @UsePipes(ValidationPipe)
   @UseInterceptors(ClassSerializerInterceptor)
-  public async getProducts(): Promise<Products[]> {
-    return await this.productsService.show();
+  public async getProducts(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ): Promise<Pagination<Products>> {
+    limit = limit > 100 ? 100 : limit;
+    return await this.productsService.show({
+      page,
+      limit,
+      route: 'http://localhost:3000/products',
+    });
   }
 
   @Get('/:id')

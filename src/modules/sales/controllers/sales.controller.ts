@@ -2,9 +2,12 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseIntPipe,
   Post,
+  Query,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -17,6 +20,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
 import { CreateSalesDTO } from '../dtos/create-sales.dto';
 import { Sales } from '../entities/Sales.entity';
 import { SalesService } from '../services/sales.service';
@@ -92,7 +96,14 @@ export class SalesController {
   @UseInterceptors(ClassSerializerInterceptor)
   public async getSaleByUser(
     @Param('user_id') user_id: string,
-  ): Promise<Sales[] | null> {
-    return await this.salesService.getSaleByUser(user_id);
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ): Promise<Pagination<Sales>> {
+    limit = limit > 100 ? 100 : limit;
+    return await this.salesService.getSaleByUser(user_id, {
+      page,
+      limit,
+      route: 'http://localhost:3000/sales/user/:user_id',
+    });
   }
 }

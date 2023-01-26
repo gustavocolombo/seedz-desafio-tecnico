@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
 import { UpdateProductsDTO } from '../dtos/update-products.dto';
@@ -32,9 +37,11 @@ export class ProductsService {
     }
   }
 
-  public async show(): Promise<Products[]> {
+  public async show(
+    options: IPaginationOptions,
+  ): Promise<Pagination<Products>> {
     try {
-      return await this.productsRepository.find();
+      return paginate<Products>(this.productsRepository, options);
     } catch (error) {
       console.log('Erro', error);
     }

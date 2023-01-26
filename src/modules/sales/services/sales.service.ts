@@ -4,6 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  IPaginationOptions,
+  paginate,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 import { Repository } from 'typeorm';
 import { Products } from '../../products/entities/Products.entity';
 import { Users } from '../../user/entities/Users.entity';
@@ -67,7 +72,10 @@ export class SalesService {
     }
   }
 
-  public async getSaleByUser(user_id: string): Promise<Sales[]> {
+  public async getSaleByUser(
+    user_id: string,
+    options: IPaginationOptions,
+  ): Promise<Pagination<Sales>> {
     try {
       const sale = await this.salesRepository.find({ where: { user_id } });
 
@@ -76,7 +84,7 @@ export class SalesService {
           'Usuário com vendas relacionadas não encontrado',
         );
 
-      return sale;
+      return paginate<Sales>(this.salesRepository, options);
     } catch (error) {
       console.log('Erro', error);
     }
