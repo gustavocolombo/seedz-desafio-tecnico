@@ -18,7 +18,7 @@ export function ensureAuthenticatedMiddleware(
 ) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    throw new HttpException('JWT token is missing', HttpStatus.UNAUTHORIZED);
+    throw new HttpException('Token JWT está faltando', HttpStatus.UNAUTHORIZED);
   }
   const [, token] = authHeader.split(' ');
   try {
@@ -27,6 +27,6 @@ export function ensureAuthenticatedMiddleware(
     req.user = { id, email };
     return next();
   } catch {
-    throw new HttpException('Invalid JWT Token', HttpStatus.UNAUTHORIZED);
+    throw new HttpException('Token JWT inválido', HttpStatus.UNAUTHORIZED);
   }
 }

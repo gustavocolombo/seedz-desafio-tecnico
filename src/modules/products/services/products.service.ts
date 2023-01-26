@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
@@ -17,25 +17,39 @@ export class ProductsService {
     price,
     qtdAvailable,
   }: CreateProductsDTO): Promise<Products> {
-    const product = this.productsRepository.create({
-      name,
-      price,
-      qtdAvailable,
-    });
+    try {
+      const product = this.productsRepository.create({
+        name,
+        price,
+        qtdAvailable,
+      });
 
-    await this.productsRepository.save(product);
+      await this.productsRepository.save(product);
 
-    return product;
+      return product;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
   public async show(): Promise<Products[]> {
-    return await this.productsRepository.find();
+    try {
+      return await this.productsRepository.find();
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
-  public async index(id: string): Promise<Products | null> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+  public async index(id: string): Promise<Products> {
+    try {
+      const product = await this.productsRepository.findOne({ where: { id } });
 
-    return product || null;
+      if (!product) throw new NotFoundException('Produto não encontrado');
+
+      return product;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
   public async update({
@@ -44,26 +58,34 @@ export class ProductsService {
     price,
     qtdAvailable,
   }: UpdateProductsDTO): Promise<UpdateResult> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+    try {
+      const product = await this.productsRepository.findOne({ where: { id } });
 
-    if (!product) throw new BadRequestException('Product not found');
+      if (!product) throw new NotFoundException('Produto não encontrado');
 
-    const updatedProduct = await this.productsRepository.update(product.id, {
-      name,
-      price,
-      qtdAvailable,
-    });
+      const updatedProduct = await this.productsRepository.update(product.id, {
+        name,
+        price,
+        qtdAvailable,
+      });
 
-    return updatedProduct;
+      return updatedProduct;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
   public async delete(id: string): Promise<DeleteResult> {
-    const product = await this.productsRepository.findOne({ where: { id } });
+    try {
+      const product = await this.productsRepository.findOne({ where: { id } });
 
-    if (!product) throw new BadRequestException('Product not found');
+      if (!product) throw new NotFoundException('Produto não encontrado');
 
-    const deletedProduct = await this.productsRepository.delete(product.id);
+      const deletedProduct = await this.productsRepository.delete(product.id);
 
-    return deletedProduct;
+      return deletedProduct;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 }

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcryptjs';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
@@ -17,27 +21,38 @@ export class UsersService {
     email,
     password,
   }: CreateUserDTO): Promise<Users> {
-    const checkIfUserExists = await this.usersRepository.findOne({
-      where: { email },
-    });
+    try {
+      const checkIfUserExists = await this.usersRepository.findOne({
+        where: { email },
+      });
 
-    if (checkIfUserExists) throw new BadRequestException('User already exists');
+      if (checkIfUserExists)
+        throw new BadRequestException('Usuário com e-mail já cadastrado');
 
-    const user = this.usersRepository.create({
-      name,
-      email,
-      password: await hash(password, 8),
-    });
+      const user = this.usersRepository.create({
+        name,
+        email,
+        password: await hash(password, 8),
+      });
 
-    await this.usersRepository.save(user);
+      await this.usersRepository.save(user);
 
-    return user;
+      return user;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
-  public async index(id: string): Promise<Users | null> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  public async index(id: string): Promise<Users> {
+    try {
+      const user = await this.usersRepository.findOne({ where: { id } });
 
-    return user || null;
+      if (!user) throw new NotFoundException('Usuário não encontrado');
+
+      return user;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
   public async update({
@@ -46,29 +61,41 @@ export class UsersService {
     email,
     password,
   }: UpdateUserDTO): Promise<UpdateResult> {
-    const checkIfUserExists = await this.usersRepository.findOne({
-      where: { id },
-    });
+    try {
+      const checkIfUserExists = await this.usersRepository.findOne({
+        where: { id },
+      });
 
-    if (!checkIfUserExists) throw new BadRequestException('User not found');
+      if (!checkIfUserExists)
+        throw new NotFoundException('Usuário não encontrado');
 
-    const updatedUser = await this.usersRepository.update(
-      checkIfUserExists.email,
-      { name, email, password: await hash(password, 8) },
-    );
+      const updatedUser = await this.usersRepository.update(
+        checkIfUserExists.email,
+        { name, email, password: await hash(password, 8) },
+      );
 
-    return updatedUser;
+      return updatedUser;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 
   public async delete(id: string): Promise<DeleteResult> {
-    const checkIfUserExists = await this.usersRepository.findOne({
-      where: { id },
-    });
+    try {
+      const checkIfUserExists = await this.usersRepository.findOne({
+        where: { id },
+      });
 
-    if (!checkIfUserExists) throw new BadRequestException('User not found');
+      if (!checkIfUserExists)
+        throw new BadRequestException('Usuário não encontrado');
 
-    const deletedUser = await this.usersRepository.delete(checkIfUserExists.id);
+      const deletedUser = await this.usersRepository.delete(
+        checkIfUserExists.id,
+      );
 
-    return deletedUser;
+      return deletedUser;
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 }

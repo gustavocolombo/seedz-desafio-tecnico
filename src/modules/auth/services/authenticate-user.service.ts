@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,32 +22,37 @@ export class AuthenticateUserService {
     email,
     password,
   }: AuthenticateUserDTO): Promise<AuthenticateUserReturn> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    try {
+      const user = await this.usersRepository.findOne({ where: { email } });
 
-    if (!user) throw new BadRequestException('User not found, try again');
+      if (!user)
+        throw new NotFoundException('Usuário não encontrado, tente novamente');
 
-    const comparePass = await compare(password, user.password);
+      const comparePass = await compare(password, user.password);
 
-    if (!comparePass)
-      throw new UnauthorizedException(
-        'Combination of e-mail/password invalid, try again',
+      if (!comparePass)
+        throw new UnauthorizedException(
+          'Combinação de e-mail/senha inválidos, tente novamente',
+        );
+
+      const token = sign(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        secrets.secret,
+        {
+          expiresIn: secrets.expiresIn,
+          subject: user.id,
+        },
       );
 
-    const token = sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
-      secrets.secret,
-      {
-        expiresIn: secrets.expiresIn,
-        subject: user.id,
-      },
-    );
-
-    return {
-      user,
-      token,
-    };
+      return {
+        user,
+        token,
+      };
+    } catch (error) {
+      console.log('Erro', error);
+    }
   }
 }
