@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -35,6 +36,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por criar um novo produto',
   })
@@ -59,6 +61,7 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por buscar todos os produtos',
   })
@@ -85,6 +88,7 @@ export class ProductsController {
   }
 
   @Get('/:id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por buscar um produto pelo id',
   })
@@ -107,6 +111,7 @@ export class ProductsController {
   }
 
   @Put()
+  @ApiBearerAuth()
   @ApiOperation({
     description:
       'Operação responsável por atualizar as informações de um produto',
@@ -132,6 +137,7 @@ export class ProductsController {
   }
 
   @Delete('/:id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por deletar um  produto',
   })
