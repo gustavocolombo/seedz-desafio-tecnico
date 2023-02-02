@@ -10,6 +10,7 @@ import {
   Pagination,
 } from 'nestjs-typeorm-paginate';
 import { Repository } from 'typeorm';
+import ErrorHandling from '../../../shared/errors/error-handling';
 import { Products } from '../../products/entities/Products.entity';
 import { Users } from '../../user/entities/Users.entity';
 import { CreateSalesDTO } from '../dtos/create-sales.dto';
@@ -30,20 +31,20 @@ export class SalesService {
     qtdProducts,
   }: CreateSalesDTO): Promise<Sales> {
     try {
-      const checkIfUserExist = await this.usersRepository.findOne({
+      const user = await this.usersRepository.findOne({
         where: { id: user_id },
       });
 
-      const checkIfProductExists = await this.productsRepository.findOne({
+      const product = await this.productsRepository.findOne({
         where: { id: product_id },
       });
 
-      if (!checkIfUserExist || !checkIfProductExists)
+      if (!user || !product)
         throw new BadRequestException(
           'IDs inválidos para criar a venda, cheque os dados e tente novamente',
         );
 
-      const finalPrice = checkIfProductExists.price * qtdProducts;
+      const finalPrice = product.price * qtdProducts;
 
       const sale = this.salesRepository.create({
         product_id,
@@ -52,11 +53,15 @@ export class SalesService {
         qtdProducts,
       });
 
+      product.qtdAvailable -= 1;
+
+      await this.productsRepository.update(product.id, { ...product });
+
       await this.salesRepository.save(sale);
 
       return sale;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -68,7 +73,7 @@ export class SalesService {
 
       return sale;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -86,7 +91,7 @@ export class SalesService {
 
       return paginate<Sales>(this.salesRepository, options);
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 }
