@@ -11,6 +11,7 @@ import { AuthenticateUserDTO } from '../dtos/authenticate-user.dto';
 import { AuthenticateUserReturn } from '../serializers/authenticate-user-return.serializer';
 import { sign } from 'jsonwebtoken';
 import secrets from '../../../shared/config/auth/secrets';
+import ErrorHandling from '../../../shared/errors/error-handling';
 
 @Injectable()
 export class AuthenticateUserService {
@@ -52,7 +53,7 @@ export class AuthenticateUserService {
         token,
       };
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 }

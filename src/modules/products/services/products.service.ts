@@ -6,6 +6,7 @@ import {
   Pagination,
 } from 'nestjs-typeorm-paginate';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import ErrorHandling from '../../../shared/errors/error-handling';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
 import { UpdateProductsDTO } from '../dtos/update-products.dto';
 import { Products } from '../entities/Products.entity';
@@ -33,7 +34,7 @@ export class ProductsService {
 
       return product;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -43,7 +44,7 @@ export class ProductsService {
     try {
       return paginate<Products>(this.productsRepository, options);
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -55,7 +56,7 @@ export class ProductsService {
 
       return product;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -78,7 +79,7 @@ export class ProductsService {
 
       return updatedProduct;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -92,7 +93,7 @@ export class ProductsService {
 
       return deletedProduct;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 }
