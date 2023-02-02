@@ -3,18 +3,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcryptjs';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, UpdateResult } from 'typeorm';
 import { CreateUserDTO } from '../dtos/create-user.dto';
 import { UpdateUserDTO } from '../dtos/update-user.dto';
 import { Users } from '../entities/Users.entity';
+import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(Users) private usersRepository: Repository<Users>,
-  ) {}
+  constructor(private userRepository: UserRepository) {}
 
   public async create({
     name,
@@ -22,22 +20,16 @@ export class UsersService {
     password,
   }: CreateUserDTO): Promise<Users> {
     try {
-      const checkIfUserExists = await this.usersRepository.findOne({
-        where: { email },
-      });
+      const user = await this.userRepository.findByEmail(email);
 
-      if (checkIfUserExists)
+      if (user)
         throw new BadRequestException('Usuário com e-mail já cadastrado');
 
-      const user = this.usersRepository.create({
-        name,
-        email,
-        password: await hash(password, 8),
-      });
+      const data = { name, email, password: await hash(password, 8) };
 
-      await this.usersRepository.save(user);
+      const newUser = this.userRepository.create(data);
 
-      return user;
+      return newUser;
     } catch (error) {
       console.log('Erro', error);
     }
@@ -45,7 +37,7 @@ export class UsersService {
 
   public async index(id: string): Promise<Users> {
     try {
-      const user = await this.usersRepository.findOne({ where: { id } });
+      const user = await this.userRepository.findById(id);
 
       if (!user) throw new NotFoundException('Usuário não encontrado');
 
@@ -62,17 +54,13 @@ export class UsersService {
     password,
   }: UpdateUserDTO): Promise<UpdateResult> {
     try {
-      const checkIfUserExists = await this.usersRepository.findOne({
-        where: { id },
-      });
+      const checkIfUserExists = await this.userRepository.findById(id);
 
       if (!checkIfUserExists)
         throw new NotFoundException('Usuário não encontrado');
 
-      const updatedUser = await this.usersRepository.update(
-        checkIfUserExists.email,
-        { name, email, password: await hash(password, 8) },
-      );
+      const data = { id, name, email, password };
+      const updatedUser = await this.userRepository.update(data);
 
       return updatedUser;
     } catch (error) {
@@ -82,14 +70,12 @@ export class UsersService {
 
   public async delete(id: string): Promise<DeleteResult> {
     try {
-      const checkIfUserExists = await this.usersRepository.findOne({
-        where: { id },
-      });
+      const checkIfUserExists = await this.userRepository.findById(id);
 
       if (!checkIfUserExists)
         throw new BadRequestException('Usuário não encontrado');
 
-      const deletedUser = await this.usersRepository.delete(
+      const deletedUser = await this.userRepository.delete(
         checkIfUserExists.id,
       );
 
