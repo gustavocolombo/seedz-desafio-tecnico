@@ -10,6 +10,7 @@ export const setupSwagger = (app: INestApplication) => {
   const config = new DocumentBuilder()
     .setTitle(SWAGGER_API_NAME)
     .setDescription(SWAGGER_API_DESCRIPTION)
+    .addBearerAuth()
     .addTag(SWAGGER_API_TAG)
     .build();
 

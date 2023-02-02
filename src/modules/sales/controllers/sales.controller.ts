@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -31,6 +32,7 @@ export class SalesController {
   constructor(private salesService: SalesService) {}
 
   @Post()
+  @ApiBearerAuth()
   @UsePipes(ValidationPipe)
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
@@ -55,6 +57,7 @@ export class SalesController {
   }
 
   @Get('/:id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por trazer uma venda pelo id da mesma',
   })
@@ -77,6 +80,7 @@ export class SalesController {
   }
 
   @Get('/user/:user_id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por trazer uma venda pelo id do usuário',
   })

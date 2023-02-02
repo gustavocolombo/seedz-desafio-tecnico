@@ -20,11 +20,11 @@ export class Sales1674583002528 implements MigrationInterface {
           },
           {
             name: 'user_id',
-            type: 'varchar',
+            type: 'uuid',
           },
           {
             name: 'product_id',
-            type: 'varchar',
+            type: 'uuid',
           },
           {
             name: 'qtdProducts',
