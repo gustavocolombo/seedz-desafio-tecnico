@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -52,6 +53,7 @@ export class UsersController {
   }
 
   @Get('/:id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por buscar um usuário pelo id',
   })
@@ -74,6 +76,7 @@ export class UsersController {
   }
 
   @Put()
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por atualizar as informações do usuário',
   })
@@ -99,6 +102,7 @@ export class UsersController {
   }
 
   @Delete('/:id')
+  @ApiBearerAuth()
   @ApiOperation({
     description: 'Operação responsável por deleter as informações do usuário',
   })
