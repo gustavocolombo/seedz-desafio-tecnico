@@ -1,5 +1,4 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { hash } from 'bcryptjs';
 import { Repository } from 'typeorm';
 import ErrorHandling from '../../../shared/errors/error-handling';
 import { CrudInterface } from '../../../shared/implementations/crud.interface';

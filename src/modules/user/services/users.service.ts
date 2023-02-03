@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { DeleteResult, UpdateResult } from 'typeorm';
+import ErrorHandling from '../../../shared/errors/error-handling';
 import { CreateUserDTO } from '../dtos/create-user.dto';
 import { UpdateUserDTO } from '../dtos/update-user.dto';
 import { Users } from '../entities/Users.entity';
@@ -31,7 +32,7 @@ export class UsersService {
 
       return newUser;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -43,7 +44,7 @@ export class UsersService {
 
       return user;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -64,7 +65,7 @@ export class UsersService {
 
       return updatedUser;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 
@@ -81,7 +82,7 @@ export class UsersService {
 
       return deletedUser;
     } catch (error) {
-      console.log('Erro', error);
+      throw new ErrorHandling(error);
     }
   }
 }
