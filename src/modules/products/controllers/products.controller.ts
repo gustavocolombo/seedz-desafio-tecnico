@@ -2,14 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
-  Query,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -23,7 +20,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Pagination } from 'nestjs-typeorm-paginate';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
 import { UpdateProductsDTO } from '../dtos/update-products.dto';
@@ -58,33 +54,6 @@ export class ProductsController {
     @Body() { name, qtdAvailable, price }: CreateProductsDTO,
   ): Promise<Products> {
     return await this.productsService.create({ name, qtdAvailable, price });
-  }
-
-  @Get()
-  @ApiBearerAuth()
-  @ApiOperation({
-    description: 'Operação responsável por buscar todos os produtos',
-  })
-  @ApiOkResponse({
-    description: 'Os produtos foram buscados com sucesso',
-    status: 200,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'O usuário não tem permissão, por favor realize login',
-    status: 401,
-  })
-  @UsePipes(ValidationPipe)
-  @UseInterceptors(ClassSerializerInterceptor)
-  public async getProducts(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ): Promise<Pagination<Products>> {
-    limit = limit > 100 ? 100 : limit;
-    return await this.productsService.show({
-      page,
-      limit,
-      route: 'http://localhost:3000/products',
-    });
   }
 
   @Get('/:id')

@@ -1,22 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  IPaginationOptions,
-  paginate,
-  Pagination,
-} from 'nestjs-typeorm-paginate';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, UpdateResult } from 'typeorm';
 import ErrorHandling from '../../../shared/errors/error-handling';
 import { CreateProductsDTO } from '../dtos/create-products.dto';
 import { UpdateProductsDTO } from '../dtos/update-products.dto';
 import { Products } from '../entities/Products.entity';
+import { ProductsRepository } from '../repositories/products.repository';
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    @InjectRepository(Products)
-    private productsRepository: Repository<Products>,
-  ) {}
+  constructor(private productRepository: ProductsRepository) {}
 
   public async create({
     name,
@@ -24,13 +16,11 @@ export class ProductsService {
     qtdAvailable,
   }: CreateProductsDTO): Promise<Products> {
     try {
-      const product = this.productsRepository.create({
+      const product = this.productRepository.create({
         name,
         price,
         qtdAvailable,
       });
-
-      await this.productsRepository.save(product);
 
       return product;
     } catch (error) {
@@ -38,19 +28,9 @@ export class ProductsService {
     }
   }
 
-  public async show(
-    options: IPaginationOptions,
-  ): Promise<Pagination<Products>> {
-    try {
-      return paginate<Products>(this.productsRepository, options);
-    } catch (error) {
-      throw new ErrorHandling(error);
-    }
-  }
-
   public async index(id: string): Promise<Products> {
     try {
-      const product = await this.productsRepository.findOne({ where: { id } });
+      const product = await this.productRepository.findById(id);
 
       if (!product) throw new NotFoundException('Produto não encontrado');
 
@@ -67,15 +47,13 @@ export class ProductsService {
     qtdAvailable,
   }: UpdateProductsDTO): Promise<UpdateResult> {
     try {
-      const product = await this.productsRepository.findOne({ where: { id } });
+      const product = await this.productRepository.findById(id);
 
       if (!product) throw new NotFoundException('Produto não encontrado');
 
-      const updatedProduct = await this.productsRepository.update(product.id, {
-        name,
-        price,
-        qtdAvailable,
-      });
+      const data = { id, name, price, qtdAvailable };
+
+      const updatedProduct = await this.productRepository.update(data);
 
       return updatedProduct;
     } catch (error) {
@@ -85,11 +63,11 @@ export class ProductsService {
 
   public async delete(id: string): Promise<DeleteResult> {
     try {
-      const product = await this.productsRepository.findOne({ where: { id } });
+      const product = await this.productRepository.findById(id);
 
       if (!product) throw new NotFoundException('Produto não encontrado');
 
-      const deletedProduct = await this.productsRepository.delete(product.id);
+      const deletedProduct = await this.productRepository.delete(product.id);
 
       return deletedProduct;
     } catch (error) {
